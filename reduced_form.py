@@ -1,3 +1,10 @@
+def findchar(s, c):
+    i = 0
+    for i in s:
+        if i == c:
+            return True
+    return False
+
 def getSideDigits(s):
     equal_pos = s.find('=')
     digits = []
@@ -16,7 +23,7 @@ def getSideDigits(s):
             continue
         if left_side[i].isdigit() or left_side[i] in '-':
             num = ''
-            if left_side[i] in '+-':
+            if left_side[i] in '-':
                 num = left_side[i]
                 i += 1
             while i < len(left_side) and left_side[i].isspace():
@@ -45,7 +52,7 @@ def getSideDigits(s):
             continue
         if right_side[i].isdigit() or right_side[i] in '-':
             num = ''
-            if right_side[i] in '+-':
+            if right_side[i] in '-':
                 num = right_side[i]
                 i += 1
             while i < len(right_side) and right_side[i].isspace():
@@ -60,7 +67,7 @@ def getSideDigits(s):
                     num += right_side[i]
                     i += 1
             if num and num != '+' and num != '-':
-                digitsAfterEqual[str(count)] = num
+                digitsAfterEqual[count] = num
                 count += 1
         i += 1
 
@@ -80,20 +87,34 @@ def calculateType(x, x1):
 
 def reduceFunct(s):
     sideDigits = getSideDigits(s)
-    print(sideDigits)
     left_side = sideDigits[0]
     right_side = sideDigits[1]
-    i = 0
-    while i < len(left_side):
-        if str(i) in right_side:
-            left_side[i] = str(calculateType(left_side[i],
-                                             right_side[str(i)]))
-        i += 1
-    return left_side
+
+    reduced_form = {}
+
+    for i, coef in enumerate(left_side):
+        reduced_form[i] = coef
+
+    for power, coef in right_side.items():
+        if power in reduced_form:
+            reduced_form[power] = str(calculateType(reduced_form[power], coef))
+        else:
+            reduced_form[power] = str(calculateType("0", coef))
+
+    max_power = max(reduced_form.keys())
+    result = []
+    
+    for i in range(max_power + 1):
+        if i in reduced_form:
+            result.append(reduced_form[i])
+        else:
+            result.append("0")
+    
+    return result
 
 
 def changeSign(s):
-    if s.find('.'):
+    if '.' in s:
         return float(s) * -1
     else:
         return int(s) * -1
@@ -104,9 +125,9 @@ def printReduced(reducedf):
     s = ""
     i = 0
     while i < len(reducedf):
-        if reducedf[i].find('-') != -1:
+        if str(reducedf[i]).startswith('-'):
             sign[i] = "-"
-            reducedf[i] = changeSign(reducedf[i])
+            reducedf[i] = str(abs(float(reducedf[i])))
         else:
             sign[i] = "+"
 
@@ -117,5 +138,5 @@ def printReduced(reducedf):
         i += 1
 
     s += " = 0"
-    print(s)
+    print("reduced form:", s)
     return i - 1
